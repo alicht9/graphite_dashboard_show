@@ -1,0 +1,14 @@
+#ATTENTION!
+#This is just a sample config file to get you going
+#Replace it with your own values and rename it to dashboards.yml
+#
+
+---
+graphite_host: http://graphite.your.domain.net/
+time_per_graph: 10 #seconds
+graph_width: 1600
+graph_height: 800
+dashboards:
+  - my_dashboard1
+  - my_dashboard2
+  - my_dashboard3

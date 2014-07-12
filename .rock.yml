@@ -1,0 +1,3 @@
+runtime: ruby20
+
+run: ruby bin/show.rb
