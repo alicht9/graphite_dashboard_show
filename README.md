@@ -12,7 +12,7 @@ Dependencies
 <li>Rmagick</li>
 </ul>
 
-Instalation
+Installation
 =======================
 There exists a Gemfile in the root directory of this project, so the command `bundle install` will ensure all gems are installed and in the correct place.
 
