@@ -27,7 +27,7 @@ class GraphiteClient
   end
 
   def get_urls dashboard
-    render_urls = dashboard['state']['graphs'].collect {|g| g[-1]}
+    render_urls = dashboard['state']['graphs'].collect &:last
     return render_urls if render_urls[0].is_a?(String) && render_urls[0].match(/^\/render\?/)
     construct_render_urls(dashboard)
   end
