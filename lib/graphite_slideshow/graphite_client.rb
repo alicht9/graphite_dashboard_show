@@ -33,9 +33,9 @@ class GraphiteClient
   end
 
   def construct_render_urls dashboard
-    #So apparently not all dashboards in our graphite are stored the same way.
-    #Anything in here doesn't have the '/render?...' url in the response, so we
-    #have to munge everything together our selves. I <3 graphite, don't you?
+   #So apparently not all dashboards in our graphite are stored the same way.
+   #Anything in here doesn't have the '/render?...' url in the response, so we
+   #have to munge everything together our selves. I <3 graphite, don't you?
    default_params = dashboard['state']['defaultGraphParams'] 
    dashboard['state']['graphs'].collect do |graph|
      combined_graph = graph[-1].merge! default_params
