@@ -18,7 +18,7 @@ There exists a Gemfile in the root directory of this project, so the command `bu
 
 Once the bundle is complete, setup your config file. There is a sample at `config/dashboards.yml.sample`
 
-To run, simply run bin/show.rb
+To run, simply run `bin/slideshow.rb`
 
 Rock Users
 =======================
