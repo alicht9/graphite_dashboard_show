@@ -18,12 +18,14 @@ class GraphiteClient
     end
   end
 
-  def retrieve_graph url
-    self.class.get(url).parsed_response
-  end
-
   def dashboard_graph_urls dashboard_name
     get_urls load_dashboard(dashboard_name)
+  end
+
+  private
+
+  def retrieve_graph url
+    self.class.get(url).parsed_response
   end
 
   def get_urls dashboard

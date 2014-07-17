@@ -1,4 +1,5 @@
 require "graphite_slideshow/graphite_client"
+require "graphite_slideshow/dashboard"
 require "core_ext/hash"
 require "tempfile"
 require "RMagick"
@@ -6,44 +7,54 @@ require "RMagick"
 class GraphiteSlideshow
   include Magick
 
-def initialize options={}
-  @options = options.symbolize_keys!
-end
+  def initialize options={}
+    @options = options.symbolize_keys!
+    @graphite_client = GraphiteClient.new graphite_host: @options[:graphite_host]
+  end
 
-def display_images tmpfiles, time_to_wait
-  file_paths = tmpfiles.collect &:path
-  list = ImageList.new(*file_paths)
-  list.delay = time_to_wait*100
-  list.iterations = 1
-  list.animate
-end
+  def go!
+    dashboards[0].load! #gotta kick the first one off by hand
+    while true
+      dashboards.each_with_index do |dashboard, idx|
+        threads = []
 
-def go!
-  @graphite_client = GraphiteClient.new graphite_host: @options[:graphite_host]
+        threads << Thread.new { display_dashboard dashboard }
+        threads << Thread.new { preload_next_dashboard idx }
 
-  while true
-    @options[:dashboards].each do |dashboard_name|
-      tmpfiles = []
-      begin
-        @graphite_client.dashboard_graph_urls(dashboard_name).each do |graph_url|
-          #Either override or add in the sizes we want for the graph
-          graph_url << "&width=#{@options[:graph_width]}"   unless graph_url.gsub!(/width=\d+/,  "width=#{@options[:graph_width]}")
-          graph_url << "&height=#{@options[:graph_height]}" unless graph_url.gsub!(/height=\d+/, "height=#{@options[:graph_height]}")
-
-          graph_png = Tempfile.new("graphite.render")
-          @graphite_client.download_graph!(graph_url, graph_png.path)
-
-          tmpfiles << graph_png
-        end
-        display_images(tmpfiles, @options[:time_per_graph])
-      ensure
-        tmpfiles.each do |file|
-          file.close
-          file.unlink #not really needed after close, but we'll be explicit rather than rely on GC
-        end
+        threads.each &:join
       end
     end
   end
-end
+
+  private
+
+  def dashboards
+    @dashboards ||= @options[:dashboards].collect do |dashboard|
+      Dashboard.new(
+        name: dashboard,
+        graphite_client: @graphite_client,
+        graph_width:  @options[:graph_width],
+        graph_height: @options[:graph_height],
+      )
+    end
+  end
+
+  def display_images tmpfiles, time_to_wait
+    file_paths = tmpfiles.collect &:path
+    list = ImageList.new(*file_paths)
+    list.delay = time_to_wait*100
+    list.iterations = 1
+    list.animate
+  end
+
+  def display_dashboard dashboard
+    display_images(dashboard.images, @options[:time_per_graph])
+    dashboard.cleanup!
+  end
+
+  def preload_next_dashboard current_idx
+    next_index = (current_idx == (@dashboards.count - 1)) ? 0 : current_idx + 1
+    dashboards[next_index].load!
+  end
 
 end
