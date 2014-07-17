@@ -1,9 +1,11 @@
+require "parallel"
 class Dashboard
   def initialize options
     @name            = options[:name]
     @graphite_client = options[:graphite_client]
     @graph_width     = options[:graph_width]
     @graph_height    = options[:graph_height]
+    @max_downloads   = options[:max_downloads] || 1
     @loaded          = false
     @tmp_files       = []
   end
@@ -28,10 +30,14 @@ class Dashboard
   end
 
   def load!
-    graph_urls.each do |url|
+    puts "loading #{@name} #{graph_urls.count} graphs"
+    start = Time.now
+    Parallel.each(graph_urls, :in_threads => @max_downloads) do |url|
+      puts "downloading graph"
       @tmp_files << Tempfile.new("graphite.render")
       @graphite_client.download_graph! url, @tmp_files[-1].path
     end
+    puts "done #{Time.now - start}"
     @loaded = true
   end
 

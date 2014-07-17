@@ -35,6 +35,7 @@ class GraphiteSlideshow
         graphite_client: @graphite_client,
         graph_width:  @options[:graph_width],
         graph_height: @options[:graph_height],
+        max_downloads: @options[:parallel_downloads],
       )
     end
   end

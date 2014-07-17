@@ -8,6 +8,7 @@ graphite_host: http://graphite.your.domain.net/
 time_per_graph: 10 #seconds
 graph_width: 1600
 graph_height: 800
+max_downloads: 3
 dashboards:
   - my_dashboard1
   - my_dashboard2
